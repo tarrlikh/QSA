@@ -18,11 +18,18 @@ unity=np.eye(2,dtype='complex')
 
 pauli=[unity,sx,sy,sz]
 
-def identity(number_of_qubits):
-    return(np.eye(2**number_of_qubit, dtype='complex'))
+number_of_qubits=3
 
-def pauli_single(number_of_qubits, position_of_pauli, type_of_pauli):
-    u=np.array([1])
+def starting_state():
+    state=np.zeros(2**number_of_qubits)
+    state[0]=1
+    return(state)
+
+def identity():
+    return(np.eye(2**number_of_qubits, dtype='complex'))
+
+def pauli_operator(position_of_pauli, type_of_pauli):
+    u=trivial_operator
     for i in range(number_of_qubits):
         if i==position_of_pauli:
             u=np.kron( u , pauli[type_of_pauli] )
@@ -30,23 +37,31 @@ def pauli_single(number_of_qubits, position_of_pauli, type_of_pauli):
             u=np.kron( u , pauli[0] )
     return(u)
 
-def pauli_string(number_of_qubits, paulis_from_string):
-    string=identity(number_of_qubits)
+def pauli_string_operator(list_of_paulis):
+    string_operator=identity()
     
-    for i in range(len(paulis_from_string)):
-        string=string.dot(pauli_single(number_of_qubits, paulis_from_string[i][0], paulis_from_string[i][1]))
     
-    return(string)
+    #list of paulis contains pairs of elements: 0 - position of a pauli, 1 - type of a pauli
+    for i in range(len(list_of_paulis)):
+        string_operator=string_operator.dot( pauli_operator(list_of_paulis[i][0] , list_of_paulis[i][1]) )
+    
+    return(string_operator)
 
-def string_catalogue(number_of_qubits, labels_of_strings):
-    catalogue=[]
+def list_of_string_operators(list_of_strings):
+    lis=[]
     
-    for i in range(len(labels_of_strings)):
-        catalogue.append(pauli_string(number_of_qubits, labels_of_strings[i]))
+    #list of strings contains elements which are lists of paulis
     
-    return(string)
+    for i in range(len(list_of_strings)):
+        lis+=pauli_string_operator(list_of_strings[i])
+    
+    return(lis)
 
-def string_iexp(number_of_qubits, string, theta):
-    return(np.cos(theta)*identity(number_of_qubits)+1j*np.sin(theta)*string)
+def string_iexp(string, theta):
+    return(np.cos(theta)*identity()+1j*np.sin(theta)*pauli_string_operator(string))
+
+
+
+
     
 
