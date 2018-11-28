@@ -6,13 +6,18 @@ from scipy.optimize import minimize
 
 
 
-def fidelity(ansatz_parameters):
-    return(-np.real( ( ans.ansatz_operator(fidelity_ansatz,ansatz_parameters).dot( el.starting_state() ) ).dot(fidelity_target_state) ) )
+def optimize_fidelity_nonhessianmethods(ansatz, target_state, method=None):
+    fidelity = lambda ansatz_parameters: -np.real( ( ans.ansatz_state(ansatz, ansatz_parameters) ).dot(target_state) )**2 
+    return( minimize( fidelity, np.ones(len(ansatz)) , method=method) )
 
-def maximize_fidelity(ansatz, target_state):
-    global fidelity_ansatz
-    fidelity_ansatz=ansatz
-    global fidelity_target_state
-    fidelity_target_state=target_state
-    return( minimize( fidelity, np.zeros(len(ansatz)) ) )
+
+
+def optimize_fidelity_hessianmethods(ansatz, target_state, method):
+    fidelity = lambda ansatz_parameters: -np.real( ( ans.ansatz_state(ansatz, ansatz_parameters) ).dot(target_state) )**2 
     
+    observable=-np.transpose([target_state]).dot(np.array([target_state]))
+    
+    first, sec = ans.hessian_preparation(ansatz)
+    
+    return( minimize( fidelity, np.ones(len(ansatz)), jac=lambda thetas: ans.jacobian_computation(observable, ansatz, thetas, first), method=method) )
+#     return( minimize( fidelity, np.ones(len(ansatz)), jac=lambda thetas: ans.jacobian_computation(observable, ansatz, thetas, first), hess=lambda thetas: ans.hessian_computation(observable, ansatz, thetas, first, sec) , method=method) )
