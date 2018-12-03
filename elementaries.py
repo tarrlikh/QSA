@@ -20,15 +20,16 @@ pauli=[unity,sx,sy,sz]
 
 basis=np.eye(2,dtype='complex')
 
-number_of_qubits=5
+number_of_qubits=6
+
+identity=np.eye(2**number_of_qubits, dtype='complex')
+
+default_state=identity[0]
 
 def starting_state():
     state=np.zeros(2**number_of_qubits)
     state[0]=1
     return(state)
-
-def identity():
-    return(np.eye(2**number_of_qubits, dtype='complex'))
 
 def pauli_operator(position_of_pauli, type_of_pauli):
     '''
@@ -80,7 +81,7 @@ def pauli_string_operator(string_identifier):
             
     return(string_operator)
 
-def list_of_string_operators(list_of_string_identifiers):
+def list_of_strings(list_of_string_ids):
     '''
     Calculates a list of Pauli string operators.
     
@@ -91,35 +92,20 @@ def list_of_string_operators(list_of_string_identifiers):
     
     #list of strings contains elements which are lists of paulis
     
-    for i in range(len(list_of_string_identifiers)):
-        lis+=pauli_string_operator(list_of_string_identifiers[i])
+    for i in range(len(list_of_string_ids)):
+        lis+=[pauli_string_operator(list_of_string_ids[i])]
     
     return(lis)
+
 
 def string_iexp(string, theta):
     '''
     Calculates an imaginary exponential of a Pauli string, multiplied by parameter theta.
     
-    Inputs a string identifier and the angle theta, outputs a Hilbert space operator.
+    Inputs a string operator and the angle theta, outputs an exponential operator.
     '''
-    return(np.cos(theta)*identity()+1j*np.sin(theta)*pauli_string_operator(string))
+    return(np.cos(theta)*identity+1j*np.sin(theta)*string)
 
-def YXXstring_computational_basis_action(YXX_string, state_bitstring, prefactor):
-    '''
-    Computes an action of a Pauli string on a computational basis state, on the level of corresponding bitstrings and complex prefactors.
-    
-    Inputs a bitstring and a prefactor of an old state, outputs the bitstring and a prefactor of a new state.
-    '''
-    
-    new_prefactor=prefactor
-    new_state_bitstring=state_bitstring.copy()
-    
-    for element in YXX_string:
-        if (element[1]==2):
-            new_prefactor*=(1j)*(-1)**(state_bitstring[element[0]])
-        new_state_bitstring[element[0]]=np.mod(state_bitstring[element[0]]+1,2)
-    
-    return(new_state_bitstring, new_prefactor)
 
 def state_from_bitstring(bitstring, prefactor=1):
     '''
