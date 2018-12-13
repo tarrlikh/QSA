@@ -1,6 +1,6 @@
 import numpy as np
 import elementaries as el
-import random
+from numpy import random
 
 
 def single_qubit_paulis (alpha):
@@ -31,6 +31,6 @@ def random_subhamiltonian (disorder_strength, generators):
     
     for row in generators:
         for element in row:
-            hamiltonian=hamiltonian+random.uniform(-disorder_strength/2, disorder_strength/2)*element
+            hamiltonian=hamiltonian+random.normal(0,disorder_strength)*element
     
     return(hamiltonian)

@@ -26,28 +26,41 @@ def QSA_paulis(string):
 
     return(lis)
 
+def k0_subsets(k0):
+    '''
+    Returns subsets of k0 elements from the ordered list of qubits (from 1 to N)
+    '''    
+
+    #some extra massaging performed, so that a list of lists is returned
+    
+    return(list(map(list,itertools.combinations(list(range(el.number_of_qubits)),k0))))
+
 def k0QSA(k0):
     '''
     Creates a list of pauli string identifiers, corresponding to a k0-quantum subset ansatz. This means that all the QSA gates of order k0 are used. 
     '''    
-    #returns subsets of k0 elements from the ordered list of qubits (from 1 to N); 
-    #some extra massaging performed, so that a list of lists is returned
     
-    string_list=list(map(list,itertools.combinations(list(range(el.number_of_qubits)),k0)))
-    
-    string_list_with_paulis=list(map(QSA_paulis, string_list))
-    
-    return(string_list_with_paulis)
+    return(list(map(QSA_paulis, k0_subsets(k0))))
 
 def kQSA(k):
     '''
-    Creates a list of pauli string identifiers, corresponding to a k-quantum subset ansatz. This means that all the QSA gates of order smaller or equal to k are used. 
+    Creates a list of pauli string identifiers, corresponding to a k-quantum subset ansatz. This means that all the QSA gates of order smaller or equal to k are used, and its canonical form is sustained.
     '''    
     lis=[]
     for k0 in range(1,k+1):
-        lis+=k0QSA(k0)
+        lis+=k0_subsets(k0)
     
-    return(lis)
+    #sorting everything according to full-QSA prescription: finding the right reordering
+    ind=[]
+    
+    for element in lis:
+        ind+=[element[0]]
+        
+    ind=np.array(ind).argsort()[::-1]
+    
+    lis=list(np.array(lis)[ind])
+    
+    return(list(map(QSA_paulis, lis)))
 
 def ansatz_operator(list_of_strings, list_of_thetas):
     '''
@@ -158,7 +171,7 @@ def hessian_computation(observable, list_of_strings, list_of_thetas, first_deriv
             state_j=theta_derivative_computation(list_of_strings, list_of_thetas, data_j[0], data_j[1])
             state_ij=theta_derivative_computation(list_of_strings, list_of_thetas, data_ij[0], data_ij[1])
             
-            hess=np.real(state_i.dot(observable.dot(state_j))+state.dot(observable.dot(state_ij)))
+            hess=2*np.real(state_i.dot(observable.dot(state_j))+state.dot(observable.dot(state_ij)))
             hessian_computed[i][j]=hess
         
     return(np.array(hessian_computed))

@@ -2,34 +2,31 @@ import numpy as np
 
 trivial_operator=np.array([1])
 
-sx=np.zeros((2,2),dtype='complex')
+data_type='complex128'
+
+sx=np.zeros((2,2),dtype=data_type)
 sx[0,1]=1
 sx[1,0]=1
 
-sy=np.zeros((2,2),dtype='complex')
+sy=np.zeros((2,2),dtype=data_type)
 sy[0,1]=-1j
 sy[1,0]=1j
 
-sz=np.zeros((2,2),dtype='complex')
+sz=np.zeros((2,2),dtype=data_type)
 sz[0,0]=1
 sz[1,1]=-1
 
-unity=np.eye(2,dtype='complex')
+unity=np.eye(2,dtype=data_type)
 
 pauli=[unity,sx,sy,sz]
 
-basis=np.eye(2,dtype='complex')
+basis=np.eye(2,dtype=data_type)
 
 number_of_qubits=6
 
-identity=np.eye(2**number_of_qubits, dtype='complex')
+identity=np.eye(2**number_of_qubits, dtype=data_type)
 
 default_state=identity[0]
-
-def starting_state():
-    state=np.zeros(2**number_of_qubits)
-    state[0]=1
-    return(state)
 
 def pauli_operator(position_of_pauli, type_of_pauli):
     '''
@@ -123,6 +120,17 @@ def state_from_bitstring(bitstring, prefactor=1):
     
     return(state)
 
-
+def partial_trace(state, cut=number_of_qubits//2, number_of_qubits=number_of_qubits):
+    density_matrix=np.transpose([state]).dot(np.array([state]))
+    density_matrix=density_matrix.reshape((2**cut, 2**(number_of_qubits-cut), 2**cut, 2**(number_of_qubits-cut) ))
+    density_matrix=np.transpose(density_matrix, (0,2,1,3))
+    red_matrix=np.trace(density_matrix)
     
+    return(red_matrix)
 
+def entropy(density_matrix):
+    eigenvalues=np.linalg.eig(density_matrix)[0]
+    S=0
+    for element in eigenvalues:
+        S-=element*np.log(element)
+    return(S)
