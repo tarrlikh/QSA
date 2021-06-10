@@ -14,11 +14,12 @@ def QSA_paulis(string):
     lis=[]
     switch=0
     
+
     for element in string:
-        
+
         if switch == 1:
             lis+=[[element,1]]
-        
+
         if switch == 0:
             lis+=[[element, 2]]
             switch+=1
@@ -42,7 +43,7 @@ def k0QSA(k0):
     
     return(list(map(QSA_paulis, k0_subsets(k0))))
 
-def kQSA(k):
+def kQSA(k, reverse=False):
     '''
     Creates a list of pauli string identifiers, corresponding to a k-quantum subset ansatz. This means that all the QSA gates of order smaller or equal to k are used, and its canonical form is sustained.
     '''    
@@ -55,12 +56,32 @@ def kQSA(k):
     
     for element in lis:
         ind+=[element[0]]
+    
+    if reverse==False:
+        ind=np.array(ind).argsort()[::-1]
+    else:
+        ind=np.array(ind).argsort()
+
+    lis=list(np.array(lis)[ind])
+    
+    return(list(map(QSA_paulis, lis)))
+
+def customQSA(diagram_list):
+    
+    lis=diagram_list.copy()
+    
+    ind=[]
+    
+    for element in lis:
+        ind+=[element[0]]
         
     ind=np.array(ind).argsort()[::-1]
     
     lis=list(np.array(lis)[ind])
     
     return(list(map(QSA_paulis, lis)))
+    
+    
 
 def ansatz_operator(list_of_strings, list_of_thetas):
     '''

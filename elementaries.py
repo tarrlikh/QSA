@@ -28,6 +28,15 @@ identity=np.eye(2**number_of_qubits, dtype=data_type)
 
 default_state=identity[0]
 
+x_default_state=np.ones(2**number_of_qubits)/np.sqrt(2**number_of_qubits)
+
+def kron_delta(x,y):
+    if (x==y):
+        output=1
+    else:
+        output=0
+    return(output)
+
 def pauli_operator(position_of_pauli, type_of_pauli):
     '''
     Calculates a single pauli operator.
@@ -64,17 +73,11 @@ def pauli_string_operator(string_identifier):
     Inputs a string identifier, i.e. a list of string's paulis. List elements are pairs: [position of a pauli, type of a pauli].
     '''    
     
-    string_operator=trivial_operator
+    string_operator=identity
     
-    j=0
-    
-    for i in range(number_of_qubits):
-        if i==string_identifier[j][0]:
-            string_operator=np.kron( string_operator , pauli[string_identifier[j][1]] )
-            if j<(len(string_identifier)-1):
-                j+=1
-        else:
-            string_operator=np.kron( string_operator , pauli[0] )
+    for element in string_identifier:
+        string_operator=string_operator.dot(pauli_operator(element[0],element[1]))
+
             
     return(string_operator)
 

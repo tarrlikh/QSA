@@ -6,31 +6,39 @@ from numpy import random
 def single_qubit_paulis (alpha):
     
     pauli_ids=[[[i, alpha]] for i in range(el.number_of_qubits)]
-    paulis=[el.pauli_string_operator(pauli_ids[i]) for i in range(el.number_of_qubits)]
     
-    return(paulis)
+    return(pauli_ids)
 
 def two_qubit_strings (alpha, beta):
     
-    string_ids=[[[[i, alpha], [j, beta]] for i in range(el.number_of_qubits)] for j in range(el.number_of_qubits)]
-    strings=[[el.pauli_string_operator(string_ids[i][j]) for i in range(el.number_of_qubits)] for j in range(el.number_of_qubits)]
+    string_ids=[ [[i, alpha], [j, beta]] for i in range(el.number_of_qubits) for j in range(el.number_of_qubits)]
     
-    return(strings)
+    return(string_ids)
 
-def constant_subhamiltonian (magnitude, generators):
+def nearest_neighbour_1D (alpha,beta):
     
-    hamiltonian=0*el.identity
+    string_ids=[ [[i, alpha], [i+1, beta]] for i in range(el.number_of_qubits-1)]
     
-    for element in generators:
-        hamiltonian+=magnitude*element
+    return(string_ids)
+
+def constant_subhamiltonian (magnitude, generator_ids):
+    
+    hamiltonian=0.*el.identity
+    
+    for element in generator_ids:
+        hamiltonian+=el.pauli_string_operator(element)
+    
+    hamiltonian*=magnitude
     
     return(hamiltonian)
 
-def random_subhamiltonian (disorder_strength, generators):
-    hamiltonian=0*el.identity
+def random_subhamiltonian (disorder_strength, generator_ids):
+    hamiltonian=0.*el.identity
     
-    for row in generators:
-        for element in row:
-            hamiltonian=hamiltonian+random.normal(0,disorder_strength)*element
+    for element in generator_ids:      
+        hamiltonian=hamiltonian+random.normal(0,disorder_strength)*el.pauli_string_operator(element)
     
     return(hamiltonian)
+
+# def custom_subhamiltonian(filter, generators):
+    
